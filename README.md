@@ -1,5 +1,9 @@
 # 论坛社区 Forum Community
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.2-092E20.svg)](https://www.djangoproject.com/)
+
 一个基于 **Django 5** 开发的论坛社区网站，包含用户系统、版块发帖、回复互动、站内通知与后台管理等完整功能。
 
 > 本项目配套《技术选型与开发清单》文档，见 [`docs/`](docs/) 目录。
@@ -149,4 +153,4 @@ forum-community/
 
 ## 许可证
 
-本项目暂未指定开源许可证。如需他人自由使用，建议补充 `LICENSE` 文件（例如 MIT）。
+本项目基于 [MIT License](LICENSE) 开源，你可以自由使用、修改、分发甚至商用，只需保留原始版权声明。
