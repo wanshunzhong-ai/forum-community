@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}首页 · {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <div class="layout-main">
+
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">版块</h2>
+      </div>
+      <div class="category-grid">
+        {% for c in categories %}
+          <a class="category-card" href="{{ c.get_absolute_url }}">
+            <span class="category-icon">{{ c.icon }}</span>
+            <span class="category-body">
+              <span class="category-name">{{ c.name }}</span>
+              <span class="category-desc">{{ c.description|default:"暂无简介" }}</span>
+              <span class="category-stat">{{ c.thread_count }} 主题 · {{ c.post_count }} 回复</span>
+            </span>
+          </a>
+        {% empty %}
+          <p class="muted">还没有版块，先去 <a href="/admin/">后台</a> 创建一个吧。</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">最新主题</h2>
+        {% if user.is_authenticated %}
+          <a class="more" href="{% url 'forum:thread_create' %}">+ 发新帖</a>
+        {% endif %}
+      </div>
+      {% for t in latest_threads %}
+        {% include "forum/_thread_row.html" with show_category=True %}
+      {% empty %}
+        <p class="muted">还没有任何主题，来发第一帖吧！</p>
+      {% endfor %}
+    </section>
+
+  </div>
+
+  <aside class="layout-side">
+    <section class="card">
+      <h2 class="card-title">站点统计</h2>
+      <ul class="stats-list">
+        <li><span>主题</span><b>{{ stats.threads }}</b></li>
+        <li><span>回复</span><b>{{ stats.posts }}</b></li>
+        <li><span>成员</span><b>{{ stats.users }}</b></li>
+        <li><span>今日新帖</span><b>{{ stats.today }}</b></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">🔥 热门主题</h2>
+      <ol class="hot-list">
+        {% for t in hot_threads %}
+          <li><a href="{{ t.get_absolute_url }}">{{ t.title }}</a></li>
+        {% empty %}
+          <li class="muted">暂无数据</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+
+</div>
+{% endblock %}

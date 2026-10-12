@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}举报 · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="card narrow">
+  <h1 class="page-title">举报内容</h1>
+  <p class="muted">你正在举报：<b>{{ target }}</b></p>
+
+  <form method="post" class="form">
+    {% csrf_token %}
+    <div class="form-row">
+      <label class="form-label" for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+      {{ form.reason }}
+      {% if form.reason.errors %}<div class="form-error">{{ form.reason.errors|striptags }}</div>{% endif %}
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">提交举报</button>
+      <a class="link-btn" href="{{ target.get_absolute_url }}">取消</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

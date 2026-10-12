@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ category.name }} · {{ site_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="{% url 'forum:home' %}">首页</a>
+  <span class="sep">/</span>
+  <span>{{ category.name }}</span>
+</nav>
+
+<section class="card">
+  <div class="card-head">
+    <div class="cat-head">
+      <span class="category-icon">{{ category.icon }}</span>
+      <div>
+        <h1 class="cat-title">{{ category.name }}</h1>
+        <p class="muted">{{ category.description|default:"暂无简介" }}</p>
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+      <a class="btn btn-primary btn-sm" href="{% url 'forum:thread_create_in_category' category.pk %}">+ 发新帖</a>
+    {% endif %}
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs">
+      <a class="tab {% if sort == 'latest' %}active{% endif %}" href="?sort=latest">最新回复</a>
+      <a class="tab {% if sort == 'new' %}active{% endif %}" href="?sort=new">最新发布</a>
+      <a class="tab {% if sort == 'hot' %}active{% endif %}" href="?sort=hot">热门</a>
+    </div>
+    <span class="muted small">共 {{ thread_total }} 个主题</span>
+  </div>
+
+  <div class="thread-list">
+    {% for t in page_obj %}
+      {% include "forum/_thread_row.html" %}
+    {% empty %}
+      <p class="muted">这个版块还没有主题，来做第一个发帖的人吧。</p>
+    {% endfor %}
+  </div>
+
+  {% include "forum/_pagination.html" %}
+</section>
+{% endblock %}

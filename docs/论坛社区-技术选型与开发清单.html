@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>论坛社区网站 · 技术选型与开发清单</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --ink:#1f2430;
+    --ink-2:#5a6172;
+    --ink-3:#8b93a5;
+    --line:#e6e8ee;
+    --line-2:#eef0f5;
+    --accent:#4f46e5;
+    --accent-soft:#eef0ff;
+    --ok:#16a34a;
+    --ok-soft:#e9f7ef;
+    --warn:#b45309;
+    --warn-soft:#fdf3e3;
+    --code:#f3f4f7;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 80px}
+
+  /* 顶部进度条 */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(255,255,255,.88);
+    backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:960px;margin:0 auto;padding:12px 20px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .topbar .label{font-size:13px;color:var(--ink-2);white-space:nowrap}
+  .track{flex:1;height:8px;background:var(--line-2);border-radius:99px;overflow:hidden}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,#6366f1,#4f46e5);border-radius:99px;transition:width .35s ease}
+  .pct{font-size:13px;font-weight:700;color:var(--accent);min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+  .btn{
+    border:1px solid var(--line);background:#fff;color:var(--ink-2);
+    font-size:12.5px;padding:5px 12px;border-radius:99px;cursor:pointer;
+    transition:.15s;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+  /* 头部 */
+  header.head{padding:44px 0 8px}
+  .kicker{
+    display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-soft);
+    padding:4px 12px;border-radius:99px;font-weight:700;
+  }
+  h1{font-size:32px;line-height:1.3;margin:16px 0 8px;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);font-size:15px;margin:0}
+  .meta{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-size:12.5px;color:var(--ink-2);background:var(--card);
+    border:1px solid var(--line);padding:4px 12px;border-radius:99px;
+  }
+  .chip b{color:var(--ink)}
+
+  /* 卡片 */
+  section{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px 28px;margin-top:22px;
+  }
+  h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h2 .idx{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);
+    font-size:13px;font-weight:800;flex:none;
+  }
+  .sec-desc{color:var(--ink-3);font-size:13.5px;margin:0 0 18px 36px}
+
+  h3{font-size:14px;margin:22px 0 10px;color:var(--ink-2);letter-spacing:.02em}
+
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;background:#fafbfd}
+  tr:last-child td{border-bottom:none}
+  td code,code{background:var(--code);padding:2px 6px;border-radius:6px;font-size:12.5px;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+  .nowrap{white-space:nowrap}
+
+  /* 提示块 */
+  .callout{
+    border-left:3px solid var(--accent);background:var(--accent-soft);
+    padding:12px 16px;border-radius:0 10px 10px 0;font-size:13.5px;color:#3b3f52;margin:14px 0 4px;
+  }
+  .callout.warn{border-color:var(--warn);background:var(--warn-soft);color:#6b4a10}
+  .callout b{color:inherit}
+
+  /* 里程碑 */
+  .ms{
+    border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden;
+    transition:border-color .2s;
+  }
+  .ms:hover{border-color:#d8dbe6}
+  .ms-head{
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    padding:14px 18px;background:#fafbfd;border-bottom:1px solid var(--line-2);
+  }
+  .ms-head .tag{
+    font-size:11.5px;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--accent);
+    padding:3px 10px;border-radius:7px;flex:none;
+  }
+  .ms-head .name{font-weight:700;font-size:15px}
+  .ms-head .week{margin-left:auto;font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .ms ul{list-style:none;margin:0;padding:12px 18px 16px}
+  .ms li{display:flex;gap:10px;align-items:flex-start;padding:5px 0}
+  .ms li label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;width:100%}
+  input[type=checkbox]{
+    appearance:none;-webkit-appearance:none;flex:none;
+    width:17px;height:17px;margin-top:4px;border:1.5px solid #c9cdda;border-radius:5px;
+    background:#fff;cursor:pointer;position:relative;transition:.15s;
+  }
+  input[type=checkbox]:hover{border-color:var(--accent)}
+  input[type=checkbox]:checked{background:var(--ok);border-color:var(--ok)}
+  input[type=checkbox]:checked::after{
+    content:"";position:absolute;left:5px;top:1.5px;width:4px;height:9px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);
+  }
+  input[type=checkbox]:checked + span{color:var(--ink-3);text-decoration:line-through;text-decoration-color:#c9cdda}
+  .ms li span{font-size:14px}
+  .deliver{
+    margin:0;padding:11px 18px;background:var(--ok-soft);border-top:1px solid var(--line-2);
+    font-size:13px;color:#14532d;
+  }
+  .deliver b{color:#14532d}
+
+  footer{margin-top:34px;color:var(--ink-3);font-size:12.5px;text-align:center}
+
+  @media print{
+    .topbar,.btn{display:none!important}
+    body{background:#fff}
+    section{break-inside:avoid;box-shadow:none;border-color:#ddd}
+    .ms{break-inside:avoid}
+  }
+  @media (max-width:640px){
+    h1{font-size:24px}
+    section{padding:20px 16px}
+    .sec-desc{margin-left:0}
+    .ms-head .week{margin-left:0}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="label">开发进度</span>
+    <div class="track"><div class="bar" id="bar"></div></div>
+    <span class="pct" id="pct">0%</span>
+    <button class="btn" onclick="window.print()">打印 / 导出 PDF</button>
+    <button class="btn" id="reset">重置</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="head">
+    <span class="kicker">Development Checklist</span>
+    <h1>论坛社区网站 · 技术选型与开发清单</h1>
+    <p class="sub">基于 <b>Python</b> 技术栈，面向<b>中等规模社区</b>（数千 ~ 数万用户）的完整开发计划。</p>
+    <div class="meta">
+      <span class="chip">周期：<b>11 ~ 12 周</b>（1 人全职）</span>
+      <span class="chip">主栈：<b>Django 5</b></span>
+      <span class="chip">数据库：<b>PostgreSQL</b></span>
+      <span class="chip">里程碑：<b>M0 ~ M9</b></span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="idx">01</span>技术选型：为什么是 Python + Django</h2>
+    <p class="sec-desc">论坛是「读多写少 + 强后台管理 + 权限复杂」型产品，Django 的开箱能力刚好命中。</p>
+
+    <div class="callout">
+      <b>Django vs FastAPI：</b>Django 自带 ORM、Auth、迁移、<b>Admin 后台</b>、权限系统，其中 Admin 直接省掉大半个运营后台开发量（版主审核、封禁、删帖、举报处理可先落地）。FastAPI 异步性能更好，但鉴权 / 后台 / ORM 都需自行拼装，更适合纯 API 服务。<b>从零做论坛 → 选 Django。</b>
+    </div>
+
+    <h3>推荐技术栈</h3>
+    <table>
+      <thead><tr><th style="width:112px">分层</th><th style="width:230px">选型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>语言</td><td><code>Python 3.12+</code></td><td>与你的技术背景一致</td></tr>
+        <tr><td>Web 框架</td><td><code>Django 5.x</code></td><td>全功能、生态成熟、自带 Admin</td></tr>
+        <tr><td>API（预留）</td><td><code>Django REST Framework</code></td><td>为小程序 / App / SPA 预留接口</td></tr>
+        <tr><td>数据库</td><td><code>PostgreSQL 16</code></td><td>支持全文检索、JSONB，比 MySQL 更适合社区</td></tr>
+        <tr><td>缓存 / 队列</td><td><code>Redis 7</code></td><td>会话、热帖缓存、Celery broker</td></tr>
+        <tr><td>异步任务</td><td><code>Celery + Redis</code></td><td>邮件 / 站内信 / 通知 / 索引更新</td></tr>
+        <tr><td>搜索</td><td><code>Meilisearch</code>（首选）</td><td>轻量好部署，中文分词友好；量大再上 Elasticsearch</td></tr>
+        <tr><td>前端</td><td><code>Django 模板 + HTMX + Tailwind</code></td><td>无需复杂前端工程，SEO 天然好，1 人可 hold</td></tr>
+        <tr><td>富文本</td><td><code>Markdown + 图片粘贴上传</code></td><td>论坛主流选择</td></tr>
+        <tr><td>对象存储</td><td><code>腾讯云 COS / 阿里云 OSS + CDN</code></td><td>头像、图片附件</td></tr>
+        <tr><td>部署</td><td><code>Docker + Nginx + Gunicorn</code></td><td>单机起步，可横向扩展</td></tr>
+        <tr><td>监控</td><td><code>Sentry + Prometheus/Grafana</code></td><td>错误追踪 + 指标监控，上线必备</td></tr>
+        <tr><td>CI/CD</td><td><code>GitHub Actions</code></td><td>自动化测试 + 自动部署</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <b>前端二选一：</b>方案 A（Django 模板 + HTMX，默认推荐，开发最快）；方案 B（Vue 3 + TS + Vite + Pinia，交互更好，需有前端伙伴）。选 B 时仅替换前端阶段，后端 API 层完全不变。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="idx">02</span>核心数据模型清单</h2>
+    <p class="sec-desc">设计阶段（M0）产出 ER 图；以下为必须落地的表。</p>
+    <table>
+      <thead><tr><th style="width:78px">模块</th><th style="width:250px">数据表</th><th>关键字段</th></tr></thead>
+      <tbody>
+        <tr><td>用户</td><td><code>users_user</code>（扩展 AbstractUser）</td><td>用户名、邮箱/手机、密码、头像、签名、角色、状态、注册时间、最后登录</td></tr>
+        <tr><td>用户</td><td><code>users_profile</code></td><td>昵称、性别、地区、积分、等级</td></tr>
+        <tr><td>用户</td><td><code>users_follow</code></td><td>关注关系（follower / following）</td></tr>
+        <tr><td>版块</td><td><code>forum_category</code></td><td>名称、slug、描述、图标、排序、版主</td></tr>
+        <tr><td>版块</td><td><code>forum_board</code>（可选）</td><td>所属板块、名称（分区）</td></tr>
+        <tr><td>帖子</td><td><code>forum_thread</code></td><td>标题、作者、版块、标签、状态（正常/置顶/精华/关闭/删除）、浏览数、回复数、最后回复时间</td></tr>
+        <tr><td>帖子</td><td><code>forum_post</code>（回复）</td><td>所属主题、作者、内容、楼层、引用帖、状态</td></tr>
+        <tr><td>帖子</td><td><code>forum_tag</code></td><td>标签名、slug</td></tr>
+        <tr><td>互动</td><td><code>forum_like</code></td><td>用户、目标（帖子/回复）、类型</td></tr>
+        <tr><td>互动</td><td><code>forum_favorite</code></td><td>用户、主题</td></tr>
+        <tr><td>互动</td><td><code>forum_report</code></td><td>举报人、目标、理由、状态、处理人</td></tr>
+        <tr><td>通知</td><td><code>notify_notification</code></td><td>接收人、类型、内容、关联对象、已读</td></tr>
+        <tr><td>私信</td><td><code>message_conversation</code> / <code>message_message</code></td><td>参与者、内容、已读</td></tr>
+        <tr><td>运营</td><td><code>moderation_ban</code></td><td>用户、类型（禁言/封号）、原因、起止时间</td></tr>
+        <tr><td>安全</td><td><code>security_keyword</code></td><td>敏感词、级别、替换方式</td></tr>
+        <tr><td>系统</td><td><code>django_*</code></td><td>权限、会话、迁移等内置表</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <b>关键索引：</b><code>thread(板块, 置顶, 最后回复时间)</code>、<code>post(thread, 楼层)</code>、全文检索 GIN 索引。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="idx">03</span>开发里程碑与清单</h2>
+    <p class="sec-desc">勾选任务会自动保存进度（浏览器本地）。排期按 1 名后端全职估算，2 人协作可压缩到 7 ~ 8 周。</p>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M0</span><span class="name">需求与架构设计</span><span class="week">第 1 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m0-1"><span>梳理核心功能边界（本期做什么 / 不做什么）</span></label></li>
+        <li><label><input type="checkbox" data-id="m0-2"><span>输出 ER 图（数据模型）</span></label></li>
+        <li><label><input type="checkbox" data-id="m0-3"><span>输出 API / 页面路由清单</span></label></li>
+        <li><label><input type="checkbox" data-id="m0-4"><span>确认技术选型与部署环境（服务器 / 域名 / 备案 / 对象存储）</span></label></li>
+        <li><label><input type="checkbox" data-id="m0-5"><span>原型草图（首页、版块页、帖子详情、个人中心）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>设计文档 + 原型</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M1</span><span class="name">项目脚手架与基础设施</span><span class="week">第 2 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m1-1"><span>初始化 Django 项目结构（<code>config/</code> + 各功能 app）</span></label></li>
+        <li><label><input type="checkbox" data-id="m1-2"><span>Docker Compose：PostgreSQL + Redis + Meilisearch</span></label></li>
+        <li><label><input type="checkbox" data-id="m1-3"><span>环境变量与配置管理（django-environ，区分 dev / prod）</span></label></li>
+        <li><label><input type="checkbox" data-id="m1-4"><span>自定义用户模型 <code>AUTH_USER_MODEL</code>（必须在首次 migrate 前确定）</span></label></li>
+        <li><label><input type="checkbox" data-id="m1-5"><span>代码规范（ruff / black / pre-commit）+ Git 仓库 + 分支策略</span></label></li>
+        <li><label><input type="checkbox" data-id="m1-6"><span>CI 骨架（GitHub Actions：lint + test）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>可 <code>docker compose up</code> 跑起来的空壳项目</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M2</span><span class="name">用户系统</span><span class="week">第 3 ~ 4 周 · 1.5 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m2-1"><span>注册（邮箱/手机 + 验证码）、登录、退出、找回密码</span></label></li>
+        <li><label><input type="checkbox" data-id="m2-2"><span>第三方登录（微信 / QQ / GitHub，可选）</span></label></li>
+        <li><label><input type="checkbox" data-id="m2-3"><span>个人资料编辑、头像上传（对象存储）、修改密码</span></label></li>
+        <li><label><input type="checkbox" data-id="m2-4"><span>角色与权限：普通用户 / 版主 / 管理员</span></label></li>
+        <li><label><input type="checkbox" data-id="m2-5"><span>用户主页（发帖、回复、收藏列表）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>可注册登录并维护资料的完整用户模块</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M3</span><span class="name">版块与主题帖（核心）</span><span class="week">第 4 ~ 6 周 · 2 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m3-1"><span>版块 / 分区管理（含版主配置）</span></label></li>
+        <li><label><input type="checkbox" data-id="m3-2"><span>发帖 / 编辑 / 删除 / 移动板块</span></label></li>
+        <li><label><input type="checkbox" data-id="m3-3"><span>Markdown 富文本编辑器 + 图片粘贴上传</span></label></li>
+        <li><label><input type="checkbox" data-id="m3-4"><span>回复、引用、楼层、@ 提及</span></label></li>
+        <li><label><input type="checkbox" data-id="m3-5"><span>置顶 / 精华 / 关闭主题（版主操作）</span></label></li>
+        <li><label><input type="checkbox" data-id="m3-6"><span>列表分页、排序（最新 / 最热）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>能完整走通「发帖 → 回帖 → 管理」的论坛主流程</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M4</span><span class="name">互动与社交</span><span class="week">第 6 ~ 7 周 · 1.5 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m4-1"><span>点赞 / 收藏 / 关注（用户、主题）</span></label></li>
+        <li><label><input type="checkbox" data-id="m4-2"><span>站内通知（被回复 / 被 @ / 被点赞）+ 未读红点</span></label></li>
+        <li><label><input type="checkbox" data-id="m4-3"><span>私信（会话列表 + 消息）</span></label></li>
+        <li><label><input type="checkbox" data-id="m4-4"><span>举报入口（举报帖子 / 回复 / 用户）</span></label></li>
+        <li><label><input type="checkbox" data-id="m4-5"><span>Celery 异步发送邮件 / 通知 / 索引进队列</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>互动闭环 + 通知系统</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M5</span><span class="name">搜索与信息流</span><span class="week">第 7 ~ 8 周 · 1 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m5-1"><span>全文检索（Meilisearch 接入，标题 + 正文，中文分词）</span></label></li>
+        <li><label><input type="checkbox" data-id="m5-2"><span>标签系统 + 按标签筛选</span></label></li>
+        <li><label><input type="checkbox" data-id="m5-3"><span>首页信息流（最新 / 热门 / 精华）</span></label></li>
+        <li><label><input type="checkbox" data-id="m5-4"><span>热帖排行（Redis 计数 + 定时任务）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>可搜索、可发现内容的社区</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M6</span><span class="name">内容审核与安全</span><span class="week">第 8 ~ 9 周 · 1 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m6-1"><span>敏感词过滤（发布时拦截 / 替换 / 转审核）</span></label></li>
+        <li><label><input type="checkbox" data-id="m6-2"><span>内容机审（接入内容安全 API：文本 + 图片）</span></label></li>
+        <li><label><input type="checkbox" data-id="m6-3"><span>用户封禁 / 禁言 / 解除</span></label></li>
+        <li><label><input type="checkbox" data-id="m6-4"><span>举报处理后台（基于 Django Admin 定制）</span></label></li>
+        <li><label><input type="checkbox" data-id="m6-5"><span>反垃圾：频率限制、验证码、发帖冷却、IP 风控</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>具备运营审核能力的后台</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M7</span><span class="name">前端完善与移动适配</span><span class="week">第 9 ~ 10 周 · 1.5 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m7-1"><span>页面完善：首页 / 版块 / 主题详情 / 个人中心 / 搜索 / 通知</span></label></li>
+        <li><label><input type="checkbox" data-id="m7-2"><span>响应式布局（移动端优先）、深色模式（可选）</span></label></li>
+        <li><label><input type="checkbox" data-id="m7-3"><span>组件化：帖子卡片、编辑器、分页、空状态、加载态</span></label></li>
+        <li><label><input type="checkbox" data-id="m7-4"><span>SEO：语义化 HTML、meta、sitemap、SSR / 预渲染</span></label></li>
+        <li><label><input type="checkbox" data-id="m7-5"><span>无障碍与基础交互优化（HTMX 局部刷新）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>体验完整、手机可用、可被搜索引擎收录</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M8</span><span class="name">性能与稳定性优化</span><span class="week">第 10 ~ 11 周 · 1 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m8-1"><span>缓存策略：热帖 / 首页 / 版块列表缓存 + 缓存失效</span></label></li>
+        <li><label><input type="checkbox" data-id="m8-2"><span>数据库：慢查询分析、索引补齐、消除 N+1</span></label></li>
+        <li><label><input type="checkbox" data-id="m8-3"><span>静态资源 CDN、图片压缩与懒加载</span></label></li>
+        <li><label><input type="checkbox" data-id="m8-4"><span>分页 / 游标分页、接口限流</span></label></li>
+        <li><label><input type="checkbox" data-id="m8-5"><span>日志分级与结构化日志</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>可承载目标规模的性能基线</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-head"><span class="tag">M9</span><span class="name">测试、部署与上线</span><span class="week">第 11 ~ 12 周 · 1 周</span></div>
+      <ul>
+        <li><label><input type="checkbox" data-id="m9-1"><span>单元测试 + 接口测试（核心流程覆盖率 &gt; 70%）</span></label></li>
+        <li><label><input type="checkbox" data-id="m9-2"><span>压力测试（Locust / k6），记录 QPS 与瓶颈</span></label></li>
+        <li><label><input type="checkbox" data-id="m9-3"><span>生产部署：Nginx + Gunicorn + Docker，HTTPS 证书</span></label></li>
+        <li><label><input type="checkbox" data-id="m9-4"><span>CI/CD 自动部署 + 灰度 / 回滚方案</span></label></li>
+        <li><label><input type="checkbox" data-id="m9-5"><span>监控告警：Sentry + Prometheus / Grafana</span></label></li>
+        <li><label><input type="checkbox" data-id="m9-6"><span>数据库自动备份 + 恢复演练</span></label></li>
+        <li><label><input type="checkbox" data-id="m9-7"><span>上线检查清单（域名备案、隐私政策、用户协议、robots）</span></label></li>
+      </ul>
+      <p class="deliver"><b>交付：</b>正式上线并稳定运行的社区</p>
+    </div>
+  </section>
+
+  <footer>论坛社区网站开发清单 · 生成于 2026-10-12 · 勾选状态保存在本地浏览器</footer>
+</div>
+
+<script>
+(function(){
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.task, input[type=checkbox][data-id]'));
+  var key = 'forum-dev-checklist-v1';
+
+  function load(){
+    var raw;
+    try{ raw = JSON.parse(localStorage.getItem(key) || '{}'); }catch(e){ raw = {}; }
+    boxes.forEach(function(b){ if(raw[b.dataset.id]) b.checked = true; });
+  }
+  function save(){
+    var o = {};
+    boxes.forEach(function(b){ o[b.dataset.id] = b.checked; });
+    try{ localStorage.setItem(key, JSON.stringify(o)); }catch(e){}
+  }
+  function update(){
+    var done = boxes.filter(function(b){ return b.checked; }).length;
+    var pct = boxes.length ? Math.round(done / boxes.length * 100) : 0;
+    document.getElementById('bar').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '%';
+  }
+
+  load(); update();
+  boxes.forEach(function(b){ b.addEventListener('change', function(){ save(); update(); }); });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    boxes.forEach(function(b){ b.checked = false; });
+    save(); update();
+  });
+})();
+</script>
+</body>
+</html>

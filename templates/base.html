@@ -1,0 +1,60 @@
+{% load static %}<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="{% url 'forum:home' %}">💬 <span>{{ site_name }}</span></a>
+
+      <form class="search-form" action="{% url 'forum:search' %}" method="get">
+        <input type="search" name="q" placeholder="搜索主题…" value="{{ request.GET.q|default:'' }}">
+      </form>
+
+      <nav class="nav">
+        {% if user.is_authenticated %}
+          <a href="{% url 'forum:notifications' %}" class="nav-link">
+            通知{% if unread_count %}<span class="badge">{{ unread_count }}</span>{% endif %}
+          </a>
+          <a href="{% url 'users:profile' user.pk %}" class="nav-user">
+            {% include "forum/_avatar.html" with u=user size="avatar-sm" %}
+            <span class="nav-username">{{ user.display_name }}</span>
+          </a>
+          <a href="{% url 'forum:thread_create' %}" class="btn btn-primary btn-sm">发帖</a>
+          <form action="{% url 'users:logout' %}" method="post" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="link-btn">退出</button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:login' %}" class="nav-link">登录</a>
+          <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">注册</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for m in messages %}
+          <div class="message message-{{ m.tags|default:'info' }}">{{ m }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      © 2026 {{ site_name }} · 基于 Django 构建
+    </div>
+  </footer>
+
+</body>
+</html>

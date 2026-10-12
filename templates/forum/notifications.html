@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}通知 · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1 class="page-title">通知中心</h1>
+
+  <ul class="notify-list">
+    {% for n in page_obj %}
+      <li class="notify-item">
+        {% include "forum/_avatar.html" with u=n.actor size="avatar-sm" %}
+        <div class="notify-body">
+          <div class="notify-text">
+            {% if n.actor %}
+              <a href="{{ n.actor.get_absolute_url }}">{{ n.actor.display_name }}</a>
+            {% endif %}
+            {{ n.message }}
+          </div>
+          <div class="muted small">{{ n.created_at|naturaltime }}</div>
+        </div>
+        {% if n.url %}<a class="chip-btn" href="{{ n.url }}">查看</a>{% endif %}
+      </li>
+    {% empty %}
+      <li class="muted">暂时还没有通知。</li>
+    {% endfor %}
+  </ul>
+
+  {% include "forum/_pagination.html" %}
+</section>
+{% endblock %}

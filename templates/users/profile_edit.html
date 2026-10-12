@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}编辑资料 · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="card narrow">
+  <h1 class="page-title">编辑资料</h1>
+
+  <form method="post" enctype="multipart/form-data" class="form">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-help">{{ field.help_text }}</div>{% endif %}
+        {% if field.errors %}<div class="form-error">{{ field.errors|striptags }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">保存</button>
+      <a class="link-btn" href="{% url 'users:profile' user.pk %}">取消</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

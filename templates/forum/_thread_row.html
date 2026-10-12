@@ -1,0 +1,22 @@
+{% load humanize %}
+<a class="thread-row" href="{{ t.get_absolute_url }}">
+  {% include "forum/_avatar.html" with u=t.author %}
+  <div class="thread-main">
+    <div class="thread-title">
+      {% if t.is_pinned %}<span class="tag tag-pin">置顶</span>{% endif %}
+      {% if t.is_featured %}<span class="tag tag-feature">精华</span>{% endif %}
+      {% if t.is_closed %}<span class="tag tag-closed">已关闭</span>{% endif %}
+      {{ t.title }}
+    </div>
+    <div class="thread-meta">
+      <span class="meta-author">{{ t.author.display_name }}</span>
+      <span class="dot">·</span>{{ t.created_at|naturaltime }}
+      {% if show_category %}<span class="dot">·</span>{{ t.category.name }}{% endif %}
+      {% for tag in t.tags.all %}<span class="tag">#{{ tag.name }}</span>{% endfor %}
+    </div>
+  </div>
+  <div class="thread-stats">
+    <span class="stat"><b>{{ t.reply_count }}</b><em>回复</em></span>
+    <span class="stat"><b>{{ t.views }}</b><em>浏览</em></span>
+  </div>
+</a>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}搜索 · {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1 class="page-title">搜索</h1>
+
+  <form class="search-form-lg" action="{% url 'forum:search' %}" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="输入关键词搜索标题或正文…">
+    <button class="btn btn-primary" type="submit">搜索</button>
+  </form>
+
+  {% if q %}
+    <p class="muted">关键词「<b>{{ q }}</b>」共找到 {{ page_obj.paginator.count }} 个主题</p>
+    <div class="thread-list">
+      {% for t in page_obj %}
+        {% include "forum/_thread_row.html" with show_category=True %}
+      {% empty %}
+        <p class="muted">没有找到相关主题，换个关键词试试？</p>
+      {% endfor %}
+    </div>
+    {% include "forum/_pagination.html" %}
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load humanize forum_extras %}
+
+{% block title %}{{ thread.title }} · {{ site_name }}{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="{% url 'forum:home' %}">首页</a>
+  <span class="sep">/</span>
+  <a href="{{ thread.category.get_absolute_url }}">{{ thread.category.name }}</a>
+</nav>
+
+{# ---------------- 楼主 #}
+<article class="card post-card" id="post-op">
+  <div class="post-side">
+    {% include "forum/_avatar.html" with u=thread.author size="avatar-lg" %}
+    <a class="post-name" href="{{ thread.author.get_absolute_url }}">{{ thread.author.display_name }}</a>
+    <span class="post-badge">楼主</span>
+    <span class="post-badge muted">{{ thread.author.points }} 积分</span>
+  </div>
+
+  <div class="post-body">
+    <h1 class="thread-h1">
+      {% if thread.is_pinned %}<span class="tag tag-pin">置顶</span>{% endif %}
+      {% if thread.is_featured %}<span class="tag tag-feature">精华</span>{% endif %}
+      {% if thread.is_closed %}<span class="tag tag-closed">已关闭</span>{% endif %}
+      {{ thread.title }}
+    </h1>
+    <div class="post-meta">{{ thread.created_at|naturaltime }}发布 · {{ thread.views }} 次浏览</div>
+
+    <div class="post-content">{{ thread.body|markdownify }}</div>
+
+    {% if thread.tags.all %}
+      <div class="post-tags">
+        {% for tag in thread.tags.all %}<span class="tag">#{{ tag.name }}</span>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="post-footer">
+      {% if user.is_authenticated %}
+        <form action="{% url 'forum:like_toggle' 'thread' thread.pk %}" method="post" class="inline-form">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="chip-btn {% if liked_thread %}active{% endif %}">👍 {{ thread.likes.count }}</button>
+        </form>
+        <form action="{% url 'forum:favorite_toggle' thread.pk %}" method="post" class="inline-form">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="chip-btn {% if favorited %}active{% endif %}">
+            {% if favorited %}★ 已收藏{% else %}☆ 收藏{% endif %}
+          </button>
+        </form>
+        <a class="chip-btn" href="{% url 'forum:report_create' 'thread' thread.pk %}">举报</a>
+        {% if can_edit %}
+          <a class="chip-btn" href="{% url 'forum:thread_edit' thread.pk %}">编辑</a>
+          <form action="{% url 'forum:thread_delete' thread.pk %}" method="post" class="inline-form"
+                onsubmit="return confirm('确定要删除这个主题吗？');">
+            {% csrf_token %}<button type="submit" class="chip-btn danger">删除</button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+      {% if user.is_moderator %}
+        <span class="mod-group">
+          <form action="{% url 'forum:thread_moderate' thread.pk %}" method="post" class="inline-form">
+            {% csrf_token %}<input type="hidden" name="action" value="pin">
+            <button type="submit" class="chip-btn mod">{% if thread.is_pinned %}取消置顶{% else %}置顶{% endif %}</button>
+          </form>
+          <form action="{% url 'forum:thread_moderate' thread.pk %}" method="post" class="inline-form">
+            {% csrf_token %}<input type="hidden" name="action" value="feature">
+            <button type="submit" class="chip-btn mod">{% if thread.is_featured %}取消精华{% else %}设精华{% endif %}</button>
+          </form>
+          <form action="{% url 'forum:thread_moderate' thread.pk %}" method="post" class="inline-form">
+            {% csrf_token %}<input type="hidden" name="action" value="close">
+            <button type="submit" class="chip-btn mod">{% if thread.is_closed %}重新开放{% else %}关闭主题{% endif %}</button>
+          </form>
+        </span>
+      {% endif %}
+    </div>
+  </div>
+</article>
+
+{# ---------------- 回复列表 #}
+<div class="reply-header">
+  共 <b>{{ thread.reply_count }}</b> 条回复
+</div>
+
+{% for p in posts %}
+<article class="card post-card" id="post-{{ p.pk }}">
+  <div class="post-side">
+    {% include "forum/_avatar.html" with u=p.author size="avatar-lg" %}
+    <a class="post-name" href="{{ p.author.get_absolute_url }}">{{ p.author.display_name }}</a>
+    <span class="post-badge muted">{{ p.author.points }} 积分</span>
+  </div>
+
+  <div class="post-body">
+    <div class="post-meta">
+      <span class="floor">#{{ p.floor }}</span>
+      {{ p.created_at|naturaltime }}
+      {% if p.updated_at|date:"YmdHi" != p.created_at|date:"YmdHi" %}
+        <span class="edited">（已编辑）</span>
+      {% endif %}
+    </div>
+
+    {% if p.quote %}
+      <blockquote class="quote-block">
+        <span class="quote-author">{{ p.quote.author.display_name }}：</span>
+        {{ p.quote.content|truncatechars:120 }}
+      </blockquote>
+    {% endif %}
+
+    <div class="post-content">{{ p.content|markdownify }}</div>
+
+    <div class="post-footer">
+      {% if user.is_authenticated %}
+        <form action="{% url 'forum:like_toggle' 'post' p.pk %}" method="post" class="inline-form">
+          {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="chip-btn {% if p.pk in liked_post_ids %}active{% endif %}">👍 {{ p.likes.count }}</button>
+        </form>
+        <button type="button" class="chip-btn"
+                onclick="quotePost({{ p.pk }}, '{{ p.author.display_name|escapejs }}')">引用</button>
+        <a class="chip-btn" href="{% url 'forum:report_create' 'post' p.pk %}">举报</a>
+        {% if user == p.author or user.is_moderator %}
+          <form action="{% url 'forum:post_delete' p.pk %}" method="post" class="inline-form"
+                onsubmit="return confirm('确定删除这条回复吗？');">
+            {% csrf_token %}<button type="submit" class="chip-btn danger">删除</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</article>
+{% empty %}
+  <div class="card"><p class="muted">还没有人回复，来抢沙发吧～</p></div>
+{% endfor %}
+
+{# ---------------- 回复框 #}
+{% if thread.is_closed %}
+  <div class="card"><p class="muted">该主题已关闭，暂时无法回复。</p></div>
+{% elif user.is_authenticated %}
+  <form id="reply-form" class="card reply-form" method="post" action="{% url 'forum:reply_create' thread.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="quote" id="id_quote" value="">
+    <div class="quote-hint" id="quote-hint"></div>
+    <label class="form-label" for="id_content">发表回复</label>
+    {{ reply_form.content }}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">发表回复</button>
+      <button type="button" class="link-btn" onclick="cancelQuote()">取消引用</button>
+      <span class="muted small">支持 Markdown：**加粗**、`代码`、- 列表、&gt; 引用</span>
+    </div>
+  </form>
+{% else %}
+  <div class="card">
+    <p class="muted">请先 <a href="{% url 'users:login' %}?next={{ request.path }}">登录</a> 后参与回复。</p>
+  </div>
+{% endif %}
+
+<script>
+  function quotePost(id, name) {
+    document.getElementById('id_quote').value = id;
+    document.getElementById('quote-hint').textContent = '正在引用 #' + id + ' 楼（' + name + '）';
+    var form = document.getElementById('reply-form');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var ta = form.querySelector('textarea');
+    if (ta) { ta.focus(); }
+  }
+  function cancelQuote() {
+    document.getElementById('id_quote').value = '';
+    document.getElementById('quote-hint').textContent = '';
+  }
+</script>
+{% endblock %}
